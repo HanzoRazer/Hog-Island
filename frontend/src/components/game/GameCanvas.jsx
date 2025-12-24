@@ -226,7 +226,12 @@ const GameCanvas = ({
       ] : [0, 0, 0, 0];
       
       [-0.35, -0.05, 0.25, 0.45].forEach((offset, i) => {
-        ctx.fillRect(\n          baseSize * offset - 4 + legOffsets[i], \n          baseSize * 0.32, \n          9, \n          baseSize * 0.28\n        );
+        ctx.fillRect(
+          baseSize * offset - 4 + legOffsets[i], 
+          baseSize * 0.32, 
+          9, 
+          baseSize * 0.28
+        );
       });
       
       // Vital zone indicator (training mode)
