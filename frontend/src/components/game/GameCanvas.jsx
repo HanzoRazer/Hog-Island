@@ -331,7 +331,8 @@ const GameCanvas = ({
       ctx.lineTo(x, y + 45);
       ctx.stroke();
       
-      // Center dot\n      ctx.fillStyle = '#ff0000';
+      // Center dot
+      ctx.fillStyle = '#ff0000';
       ctx.beginPath();
       ctx.arc(x, y, 2, 0, Math.PI * 2);
       ctx.fill();
