@@ -1,26 +1,41 @@
 import React from 'react';
 import { Button } from '../ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '../ui/card';
-import { Trophy, Target, Crosshair, RotateCcw, Home, Star, Zap } from 'lucide-react';
+import { Trophy, Target, Crosshair, RotateCcw, Home, Star, Zap, TrendingUp } from 'lucide-react';
+import { LEVELS } from '../../data/mockData';
 
 const GameOver = ({ 
   score, 
   stats, 
   scenario, 
   isNewHighScore,
+  xpGained,
+  playerLevel,
   onRestart, 
   onMainMenu 
 }) => {
   const getGrade = () => {
-    if (stats.accuracy >= 90 && stats.vitalHits >= stats.hits * 0.5) return { grade: 'S', color: 'text-amber-400', label: 'MARKSMAN' };
-    if (stats.accuracy >= 80) return { grade: 'A', color: 'text-green-400', label: 'EXPERT' };
-    if (stats.accuracy >= 70) return { grade: 'B', color: 'text-blue-400', label: 'PROFICIENT' };
-    if (stats.accuracy >= 50) return { grade: 'C', color: 'text-stone-300', label: 'ADEQUATE' };
-    return { grade: 'D', color: 'text-red-400', label: 'NEEDS TRAINING' };
+    const levelData = LEVELS[scenario?.level || 1];
+    const requiredAccuracy = levelData?.requiredAccuracy || 50;
+    
+    if (stats.accuracy >= 90 && stats.vitalHits >= stats.hits * 0.4) {
+      return { grade: 'S', color: 'text-amber-400', bg: 'from-amber-500 to-orange-600', label: 'MASTER HUNTER' };
+    }
+    if (stats.accuracy >= 80) {
+      return { grade: 'A', color: 'text-green-400', bg: 'from-green-500 to-emerald-600', label: 'EXPERT' };
+    }
+    if (stats.accuracy >= 70) {
+      return { grade: 'B', color: 'text-blue-400', bg: 'from-blue-500 to-cyan-600', label: 'MARKSMAN' };
+    }
+    if (stats.accuracy >= requiredAccuracy) {
+      return { grade: 'C', color: 'text-stone-300', bg: 'from-stone-400 to-stone-500', label: 'PROFICIENT' };
+    }
+    return { grade: 'D', color: 'text-red-400', bg: 'from-red-500 to-red-700', label: 'NEEDS TRAINING' };
   };
 
   const gradeInfo = getGrade();
-  const passed = stats.accuracy >= 50;
+  const levelData = LEVELS[scenario?.level || 1];
+  const passed = stats.accuracy >= (levelData?.requiredAccuracy || 50);
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-stone-950 via-stone-900 to-stone-950 flex items-center justify-center p-4">
@@ -28,7 +43,7 @@ const GameOver = ({
         <CardHeader className="text-center border-b border-stone-700 pb-6">
           <div className="mb-4">
             {passed ? (
-              <div className="inline-flex items-center justify-center w-20 h-20 rounded-full bg-gradient-to-br from-amber-500 to-orange-600 shadow-lg shadow-amber-500/30">
+              <div className={`inline-flex items-center justify-center w-20 h-20 rounded-full bg-gradient-to-br ${gradeInfo.bg} shadow-lg`}>
                 <Trophy className="w-10 h-10 text-white" />
               </div>
             ) : (
@@ -42,6 +57,9 @@ const GameOver = ({
             {passed ? 'Scenario Complete!' : 'Training Failed'}
           </CardTitle>
           <p className="text-stone-400">{scenario?.name}</p>
+          <p className="text-stone-500 text-sm mt-1">
+            Level {scenario?.level} - {levelData?.name}
+          </p>
           
           {isNewHighScore && (
             <div className="mt-4 inline-flex items-center gap-2 bg-amber-500/20 text-amber-400 px-4 py-2 rounded-full border border-amber-500/50 animate-pulse">
@@ -51,10 +69,10 @@ const GameOver = ({
           )}
         </CardHeader>
         
-        <CardContent className="p-6 space-y-6">
+        <CardContent className="p-6 space-y-5">
           {/* Grade Display */}
           <div className="text-center">
-            <div className={`text-8xl font-black ${gradeInfo.color}`}>
+            <div className={`text-7xl font-black ${gradeInfo.color}`}>
               {gradeInfo.grade}
             </div>
             <p className={`text-sm uppercase tracking-widest ${gradeInfo.color}`}>
@@ -62,46 +80,76 @@ const GameOver = ({
             </p>
           </div>
 
-          {/* Score */}
-          <div className="text-center bg-stone-900/50 rounded-lg p-4">
-            <p className="text-stone-400 text-sm mb-1">FINAL SCORE</p>
-            <p className="text-4xl font-bold text-white font-mono">
-              {score.toLocaleString()}
-            </p>
+          {/* Score & XP */}
+          <div className="grid grid-cols-2 gap-3">
+            <div className="text-center bg-stone-900/50 rounded-lg p-3">
+              <p className="text-stone-400 text-xs mb-1">FINAL SCORE</p>
+              <p className="text-3xl font-bold text-white font-mono">
+                {score.toLocaleString()}
+              </p>
+            </div>
+            <div className="text-center bg-amber-500/10 rounded-lg p-3 border border-amber-500/30">
+              <p className="text-amber-400 text-xs mb-1 flex items-center justify-center gap-1">
+                <TrendingUp className="w-3 h-3" />
+                XP GAINED
+              </p>
+              <p className="text-3xl font-bold text-amber-400 font-mono">
+                +{xpGained.toLocaleString()}
+              </p>
+            </div>
           </div>
 
           {/* Stats Grid */}
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-2 gap-3">
             <div className="bg-stone-900/50 rounded-lg p-3 text-center">
               <Crosshair className="w-5 h-5 text-stone-400 mx-auto mb-1" />
-              <p className="text-2xl font-bold text-white font-mono">{stats.accuracy.toFixed(1)}%</p>
-              <p className="text-xs text-stone-500 uppercase">Accuracy</p>
+              <p className={`text-xl font-bold font-mono ${
+                stats.accuracy >= 70 ? 'text-green-400' : 
+                stats.accuracy >= 50 ? 'text-amber-400' : 'text-red-400'
+              }`}>
+                {stats.accuracy.toFixed(1)}%
+              </p>
+              <p className="text-xs text-stone-500">Accuracy</p>
+              <p className="text-xs text-stone-600 mt-1">
+                Required: {levelData?.requiredAccuracy || 50}%
+              </p>
             </div>
             <div className="bg-stone-900/50 rounded-lg p-3 text-center">
               <Target className="w-5 h-5 text-stone-400 mx-auto mb-1" />
-              <p className="text-2xl font-bold text-white font-mono">{stats.hits}/{stats.totalShots}</p>
-              <p className="text-xs text-stone-500 uppercase">Hits/Shots</p>
+              <p className="text-xl font-bold text-white font-mono">{stats.hits}/{stats.totalShots}</p>
+              <p className="text-xs text-stone-500">Hits / Shots</p>
             </div>
             <div className="bg-red-500/10 rounded-lg p-3 text-center border border-red-500/20">
-              <p className="text-2xl font-bold text-red-400 font-mono">{stats.vitalHits}</p>
-              <p className="text-xs text-red-400/70 uppercase">Vital Hits</p>
+              <p className="text-xl font-bold text-red-400 font-mono">{stats.vitalHits}</p>
+              <p className="text-xs text-red-400/70">Vital Hits</p>
             </div>
             <div className="bg-orange-500/10 rounded-lg p-3 text-center border border-orange-500/20">
-              <p className="text-2xl font-bold text-orange-400 font-mono">{stats.bodyHits}</p>
-              <p className="text-xs text-orange-400/70 uppercase">Body Hits</p>
+              <p className="text-xl font-bold text-orange-400 font-mono">{stats.bodyHits}</p>
+              <p className="text-xs text-orange-400/70">Body Hits</p>
             </div>
           </div>
 
           {/* Best Combo */}
           {stats.maxCombo > 1 && (
-            <div className="flex items-center justify-center gap-2 text-amber-400">
+            <div className="flex items-center justify-center gap-2 text-amber-400 bg-amber-500/10 py-2 rounded-lg">
               <Zap className="w-5 h-5" />
               <span className="font-bold">Best Combo: {stats.maxCombo}x</span>
             </div>
           )}
 
+          {/* Level Progress */}
+          <div className="bg-stone-900/50 rounded-lg p-3">
+            <div className="flex items-center justify-between mb-2">
+              <span className="text-stone-400 text-sm">Current Level</span>
+              <span className="text-amber-400 font-bold">Level {playerLevel}</span>
+            </div>
+            <p className="text-xs text-stone-500 text-center">
+              {LEVELS[playerLevel]?.name} - {LEVELS[playerLevel]?.description}
+            </p>
+          </div>
+
           {/* Action Buttons */}
-          <div className="flex gap-3 pt-4">
+          <div className="flex gap-3 pt-2">
             <Button
               onClick={onMainMenu}
               variant="outline"
