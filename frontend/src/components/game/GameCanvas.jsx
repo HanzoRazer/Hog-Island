@@ -344,7 +344,8 @@ const GameCanvas = ({
         ctx.beginPath();
         ctx.arc(x, y + (i * 10), 2, 0, Math.PI * 2);
         ctx.fill();
-        \n        // Horizontal mil-dots (for windage/lead)
+        
+        // Horizontal mil-dots (for windage/lead)
         ctx.beginPath();
         ctx.arc(x - (i * 10), y, 1.5, 0, Math.PI * 2);
         ctx.fill();
