@@ -55,9 +55,18 @@ try {
     Assert-True ($LASTEXITCODE -eq 0) 'Isolated MongoDB started'
     $mongoStarted = $true
     $mongoReady = $false
-    for ($i = 0; $i -lt 30; $i++) {
-        docker exec $container mongosh --quiet --eval 'db.adminCommand({ping:1}).ok' *> $null
-        if ($LASTEXITCODE -eq 0) { $mongoReady = $true; break }
+    for ($i = 0; $i -lt 60; $i++) {
+        # mongosh can write a connection error before MongoDB finishes starting.
+        # Under Windows PowerShell 5.1, redirected native stderr may throw when
+        # ErrorActionPreference is Stop; an early refusal must be retried.
+        $mongoPingExit = 1
+        try {
+            docker exec $container mongosh --quiet --eval 'db.adminCommand({ping:1}).ok' *> $null
+            $mongoPingExit = $LASTEXITCODE
+        } catch {
+            $mongoPingExit = 1
+        }
+        if ($mongoPingExit -eq 0) { $mongoReady = $true; break }
         Start-Sleep -Seconds 1
     }
     Assert-True $mongoReady 'MongoDB ready'
