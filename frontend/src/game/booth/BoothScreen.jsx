@@ -440,6 +440,7 @@ export default function BoothScreen({ player, levelNum, caliberKey, onExit, onRe
       else if (e.code === "KeyM") audio.toggleMute();
       else if (e.code === "ArrowUp" || e.code === "BracketRight") s.adjustZero(1);
       else if (e.code === "ArrowDown" || e.code === "BracketLeft") s.adjustZero(-1);
+      else if (e.code === "Escape" && document.pointerLockElement) document.exitPointerLock();
     };
     const wheel = (e) => {
       if (document.pointerLockElement != null) s.adjustZero(e.deltaY < 0 ? 1 : -1);

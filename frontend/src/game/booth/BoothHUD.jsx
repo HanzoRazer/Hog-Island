@@ -41,7 +41,7 @@ function Crosshairs({ muzzle, shotgun }) {
   );
 }
 
-function BallisticCard({ hud, onZero }) {
+function BallisticCard({ hud }) {
   const t = hud.target;
   const windDir = hud.windSign > 0 ? "L → R" : "R → L";
   return (
@@ -52,10 +52,6 @@ function BallisticCard({ hud, onZero }) {
           <div className="font-mono2 text-3xl font-bold text-[#F1F5F9]" data-testid="hud-zero">
             {hud.zeroYd} <span className="text-sm text-[#64748B]">yd</span>
           </div>
-        </div>
-        <div className="pointer-events-auto flex flex-col gap-1">
-          <button onClick={() => onZero(1)} data-testid="zero-up-button" className="rounded-sm border border-white/15 p-1 text-[#94A3B8] hover:text-white"><ChevronUp size={16} /></button>
-          <button onClick={() => onZero(-1)} data-testid="zero-down-button" className="rounded-sm border border-white/15 p-1 text-[#94A3B8] hover:text-white"><ChevronDown size={16} /></button>
         </div>
         <div className="text-right">
           <div className="hud-label flex items-center justify-end gap-1 text-[#94A3B8]"><Wind size={12} /> WIND</div>
@@ -153,7 +149,7 @@ export default function BoothHUD({ hud, cal, level, locked, phase, results, audi
         <div className="hud-label mt-1 text-[#64748B]">STREAK <span className="font-mono2 text-[#E6B325]">{hud.streak}</span></div>
       </div>
 
-      <BallisticCard hud={hud} onZero={onZero} />
+      <BallisticCard hud={hud} />
 
       {/* bottom-right: weapon */}
       <div className="absolute bottom-6 right-6 text-right" data-testid="hud-weapon-panel">
@@ -188,6 +184,14 @@ export default function BoothHUD({ hud, cal, level, locked, phase, results, audi
             <div className="mt-6 space-y-1 text-sm text-[#94A3B8]">
               <p><span className="font-mono2 text-[#E6B325]">MOUSE</span> aim · <span className="font-mono2 text-[#E6B325]">LMB</span> fire · <span className="font-mono2 text-[#E6B325]">hold RMB</span> scope · <span className="font-mono2 text-[#E6B325]">R</span> reload</p>
               <p><span className="font-mono2 text-[#E6B325]">↑ ↓ / scroll</span> dial zero range · <span className="font-mono2 text-[#E6B325]">M</span> mute · <span className="font-mono2 text-[#E6B325]">ESC</span> pause</p>
+            </div>
+            <div className="mx-auto mt-6 flex w-72 items-center justify-between rounded-sm border border-white/10 bg-black/50 px-4 py-3" data-testid="zero-dial">
+              <button onClick={() => onZero(-1)} data-testid="zero-down-button" className="rounded-sm border border-white/15 p-2 text-[#94A3B8] hover:text-white"><ChevronDown size={16} /></button>
+              <div className="text-center">
+                <div className="hud-label text-[#64748B]">ZERO RANGE</div>
+                <div className="font-mono2 text-2xl font-bold text-[#E6B325]" data-testid="overlay-zero">{hud.zeroYd} yd</div>
+              </div>
+              <button onClick={() => onZero(1)} data-testid="zero-up-button" className="rounded-sm border border-white/15 p-2 text-[#94A3B8] hover:text-white"><ChevronUp size={16} /></button>
             </div>
             <AudioRow audioPrefs={audioPrefs} onVolume={onVolume} onToggleMute={onToggleMute} />
             <button onClick={onExit} data-testid="booth-exit-button" className="mt-6 inline-flex items-center gap-2 text-sm text-[#64748B] hover:text-[#FF3B30]"><LogOut size={14} /> Leave the booth</button>

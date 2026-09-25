@@ -48,13 +48,23 @@ playable, shippable game (Phases 0–2) before real-time multiplayer.
   - Asset drop-in: `public/assets/` + `game/assets.config.js` manifest (map, 6 creatures, 2 pickups, 3 weapon viewmodels, sounds). `ModelSlot.jsx` HEAD-probes files (rejects SPA index.html), loads .glb via useGLTF with Suspense + error boundary, falls back to placeholders. README in `public/assets/`.
   - Fixed: drei PointerLockControls default `selector` (document) locked on any click → now `selector="#pointer-lock-disabled"`, lock only via Enter-the-Hunt button.
   - Refactor: GameScreen split into Creature.jsx, Island.jsx, Pickups.jsx, Mystical.jsx, ModelSlot.jsx, constants.js.
+- [x] 2026-06 Training Booth + caliber ballistics (iteration_3.json: backend 17/17, frontend pass; 2 UX issues fixed & self-verified):
+  - Menu card "Training Booth" → `screens/Booth.jsx` (5 level cards w/ lock state + bests, caliber picker grouped by category, per-level ledger, start).
+  - `data/calibers.js`: 18 loadouts (.22LR, .22 Mag, .223, 7.62×39 AK, .30 Carbine, .30-06 bolt, M1 Garand, .300 WM, .50 Beowulf AR pistol, .30-30, .45-70, .357 carbine, 12ga 00 buck, .357 & .45 Colt revolvers, 9mm, 10mm, .45 ACP). `model: "TBD"` placeholders for makes/models.
+  - `game/booth/ballistics.js`: v0 + drag (k=0.000346/BC) + gravity integration, zero-angle bisection solver, hold solution (drop mil, wind mil via lag-time, TOF, lead), oriented-box hog hit test. Verified: .30-06 100-yd zero → ~10 mil at 1000 yd; dead-on aim hits at 100/300/600.
+  - `game/booth/BoothScreen.jsx`: stationary FPS range (1000 yd lane, range posts/berms), one running hog at a time (level-scaled range 25–1000 yd, speed 2–30 mph, crossing angle up to 90°, wind 0–15 mph from L3), real projectile sim w/ sub-step collision, tracers + dust puffs, miss feedback (HIGH/LOW/LEFT/RIGHT inches/yards or SHORT), recoil, scope (hold RMB → per-caliber magnification, mil-dot reticle, reduced sensitivity), zero dial (↑/↓, [ ], scroll, overlay buttons), actions (semi/auto-hold/bolt/lever/pump cycle times), reload.
+  - Levels 1–5 (`levels.js`), 20 targets each, pass hits 10/11/12/13/14 → unlock next; score = 100×(1+yd/200)×(1+mph/30)×streak bonus.
+  - Backend: `GET /api/booth/progress/{player_id}`, `POST /api/booth/results` (403 on locked level, updates unlock + per-level best, returns rank), `GET /api/booth/leaderboard?level=`. Collections `booth_progress`, `booth_results`.
+  - Fixed: R3F default camera lookAt(0,0,0) from (0,1.6,0) pointed at floor → explicit rotation + view reset on start; zero chevrons moved into pause overlay; explicit Escape → exitPointerLock.
 
 ## Backlog
 - P0: User will upload "hog island" map template + weapon templates → convert to .glb if needed, place in `public/assets/`, tune `assets.config.js` scale/offsets (and `ARENA_RADIUS` in constants.js to match map).
+- P0 (from user's design doc, 2026-06): fill in weapon makes/models in `data/calibers.js` when user supplies them; fold caliber arsenal + unlocks into the main Hog Island hunt.
+- P1: Top-down shooter mode; side-scroller mode; visual style switcher (realistic / cartoon / pixel-retro); level/map select.
 - P1: minimap/threat radar; melee/dodge; weapon-specific viewmodel animation once .glb viewmodels arrive.
-- P2: More maps; matchmaking/lobby UI.
+- P2: Booth extras — moving-target lead trainer overlay, hit-zone scoring (vitals), per-caliber leaderboards, wind gusts.
 - P3 (deferred): WebSocket 2-player server-authoritative deathmatch, client prediction + interpolation.
-- Tech-debt (non-blocking): leaderboard tie-break by wave/survival_time; validate guest token on /scores.
+- Tech-debt (non-blocking): leaderboard tie-break by wave/survival_time; validate guest token on /scores and /booth/results.
 
 ## Next Tasks
 - Receive user's map/weapon templates (attach in chat) and wire them into asset slots.
