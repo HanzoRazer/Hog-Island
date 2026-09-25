@@ -5,6 +5,8 @@ import Leaderboard from "@/screens/Leaderboard";
 import LoreCodex from "@/screens/LoreCodex";
 import GameOver from "@/screens/GameOver";
 import GameScreen from "@/game/GameScreen";
+import Booth from "@/screens/Booth";
+import BoothScreen from "@/game/booth/BoothScreen";
 import { guestLogin, submitScore } from "@/lib/api";
 
 const STORAGE_KEY = "hog_island_player";
@@ -25,6 +27,13 @@ export default function App() {
   const [result, setResult] = useState(null);
   const [submitting, setSubmitting] = useState(false);
   const [submitResult, setSubmitResult] = useState(null);
+  const [booth, setBooth] = useState({ level: 1, caliber: "r223" });
+
+  const startBooth = useCallback((level, caliber) => {
+    setBooth({ level, caliber });
+    setSession((s) => s + 1);
+    setScreen("boothgame");
+  }, []);
 
   const login = useCallback(async (name) => {
     const p = await guestLogin(name);
@@ -86,6 +95,24 @@ export default function App() {
     );
   }
 
+  if (screen === "booth") {
+    return <Booth player={player} onBack={() => setScreen("menu")} onStart={startBooth} />;
+  }
+
+  if (screen === "boothgame") {
+    return (
+      <BoothScreen
+        key={session}
+        player={player}
+        levelNum={booth.level}
+        caliberKey={booth.caliber}
+        onExit={() => setScreen("booth")}
+        onRetry={() => startBooth(booth.level, booth.caliber)}
+        onNext={() => startBooth(booth.level + 1, booth.caliber)}
+      />
+    );
+  }
+
   if (screen === "gameover" && result) {
     return (
       <GameOver
@@ -111,6 +138,7 @@ export default function App() {
     <MainMenu
       player={player}
       onPlay={startGame}
+      onBooth={() => setScreen("booth")}
       onLeaderboard={() => setScreen("leaderboard")}
       onLore={() => setScreen("lore")}
       onLogout={logout}

@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useMemo } from "react";
-import { Skull, Trophy, Gamepad2, ScrollText, LogOut, ArrowLeft } from "lucide-react";
+import { Skull, Trophy, Gamepad2, ScrollText, LogOut, ArrowLeft, Crosshair } from "lucide-react";
 import { PROLOGUE } from "../data/lore";
 
 const IMG = "https://images.pexels.com/photos/10490155/pexels-photo-10490155.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=900&w=1400";
@@ -104,7 +104,7 @@ function Shell({ children, title, onBack }) {
   );
 }
 
-function MainMenu({ player, onPlay, onLeaderboard, onLore, onLogout }) {
+function MainMenu({ player, onPlay, onBooth, onLeaderboard, onLore, onLogout }) {
   const cards = [
     {
       key: "play",
@@ -114,6 +114,15 @@ function MainMenu({ player, onPlay, onLeaderboard, onLore, onLogout }) {
       action: onPlay,
       color: "#FF3B30",
       testid: "menu-play-button",
+    },
+    {
+      key: "booth",
+      icon: Crosshair,
+      title: "Training Booth",
+      desc: "Dial in 18 calibers from 25 to 1,000 yards. Running hogs, wind, five skill levels.",
+      action: onBooth,
+      color: "#06b6d4",
+      testid: "menu-booth-button",
     },
     {
       key: "board",
@@ -162,7 +171,7 @@ function MainMenu({ player, onPlay, onLeaderboard, onLore, onLogout }) {
           </div>
         </div>
 
-        <div className="mt-20 grid gap-6 md:grid-cols-3">
+        <div className="mt-20 grid gap-6 md:grid-cols-2 lg:grid-cols-4">
           {cards.map((c, i) => (
             <button
               key={c.key}
