@@ -1,0 +1,9 @@
+export const ARENA_RADIUS = 46;
+export const EYE_HEIGHT = 1.7;
+export const MOVE_SPEED = 6.2;
+export const MAX_ENEMIES = 14;
+export const PICKUP_RESPAWN_MS = 25000;
+export const SURGE_DELAY_MS = 10000;
+export const SURGE_DURATION_MS = 9000;
+export const FOG_COLOR = "#0a1512";
+export const SURGE_COLOR = "#1c0b2a";

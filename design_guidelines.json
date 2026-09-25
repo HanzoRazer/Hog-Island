@@ -1,0 +1,122 @@
+{
+  "project_name": "Hog Island - 3D Multiplayer Browser Shooter",
+  "app_type": "hybrid_fullstack",
+  "theme": "Dark Mystical Island Survival Shooter (Tactical Gothic UI)",
+  "file_extension": "js",
+  "color_palette": {
+    "background_base": "#090C0F",
+    "background_panel": "#12181F",
+    "background_panel_hover": "#1A232E",
+    "border_subtle": "rgba(255, 255, 255, 0.08)",
+    "border_active": "rgba(230, 179, 37, 0.4)",
+    "primary_crimson": "#FF3B30",
+    "rune_gold": "#E6B325",
+    "biolum_emerald": "#10B981",
+    "ether_cyan": "#06B6D4",
+    "text_primary": "#F1F5F9",
+    "text_secondary": "#94A3B8",
+    "text_muted": "#64748B"
+  },
+  "typography": {
+    "heading_font": "Barlow Condensed, Bebas Neue, sans-serif",
+    "lore_font": "Playfair Display, Cormorant Garamond, serif",
+    "body_font": "Inter, system-ui, sans-serif",
+    "mono_font": "JetBrains Mono, monospace",
+    "h1_hero": "text-4xl sm:text-5xl lg:text-6xl font-black uppercase tracking-wider",
+    "h2_section": "text-2xl sm:text-3xl lg:text-4xl font-bold uppercase tracking-wide",
+    "h3_card": "text-xl sm:text-2xl font-semibold tracking-wide",
+    "hud_stat_value": "font-mono text-2xl lg:text-3xl font-bold tracking-tight",
+    "hud_stat_label": "text-xs uppercase tracking-widest text-slate-400"
+  },
+  "layout_and_spacing": {
+    "hud_padding": "p-4 md:p-6",
+    "panel_border_radius": "rounded-sm md:rounded-md",
+    "glassmorphism_hud": "backdrop-blur-md bg-slate-950/70 border border-white/10",
+    "modal_overlay": "bg-black/80 backdrop-blur-lg"
+  },
+  "testing_attributes": {
+    "rule": "Every interactive element (button, input, tab, modal, HUD widget, list item) MUST include a unique data-testid attribute in kebab-case format.",
+    "examples": {
+      "guest_name_input": "data-testid=\"guest-name-input\"",
+      "start_match_button": "data-testid=\"start-match-button\"",
+      "leaderboard_tab": "data-testid=\"leaderboard-tab-button\"",
+      "codex_hog_card": "data-testid=\"codex-card-wild-hog\"",
+      "hud_health_bar": "data-testid=\"hud-health-bar\"",
+      "hud_ammo_counter": "data-testid=\"hud-ammo-counter\"",
+      "submit_score_button": "data-testid=\"submit-score-button\""
+    }
+  },
+  "key_screens": {
+    "landing_and_login": {
+      "description": "Atmospheric full-screen entry with fog particle background, lore prologue text stream, guest username input, and instant play trigger.",
+      "components": [
+        "LoreBanner",
+        "GuestLoginForm",
+        "AudioToggle",
+        "ControlGuideModal"
+      ]
+    },
+    "main_menu": {
+      "description": "Central hub allowing players to enter Solo/Practice mode, view Global Leaderboards, explore Island Lore Codex, or customize graphics/audio settings.",
+      "components": [
+        "NavigationTabs",
+        "ModeSelectionCards",
+        "QuickStatsWidget",
+        "LeaderboardPreview"
+      ]
+    },
+    "in_game_hud": {
+      "description": "2D overlay on top of R3F 3D Canvas with vital meters, crosshair, enemy threat radar, kill feed, ammo display, damage directional flashes, and pause menu.",
+      "components": [
+        "HealthStaminaBar",
+        "AmmoWeaponDisplay",
+        "RadarThreatCompass",
+        "CrosshairOverlay",
+        "KillFeedContainer",
+        "PauseMenuModal"
+      ]
+    },
+    "game_over": {
+      "description": "Post-match screen displaying final score, survival time, creatures vanquished, leaderboard placement status, and automated score submission feedback.",
+      "components": [
+        "ScoreSummaryCard",
+        "StatBreakdownGrid",
+        "LeaderboardSubmissionStatus",
+        "PlayAgainButton"
+      ]
+    },
+    "lore_codex": {
+      "description": "Interactive creature bestiary and ancient island archives detailing shape-shifting hogs, panthers, bears, and primordial titans.",
+      "components": [
+        "CreatureGrid",
+        "CreatureDetailModal",
+        "LoreTimeline",
+        "ThreatLevelBadge"
+      ]
+    },
+    "leaderboard": {
+      "description": "Global rankings leaderboard showing top players, scores, survival durations, favorite weapons, and search/pagination controls.",
+      "components": [
+        "PodiumTopThree",
+        "RankingsTable",
+        "PlayerSearchInput",
+        "CurrentPlayerHighlightRow"
+      ]
+    }
+  },
+  "image_urls": {
+    "mystical_fog_island": "https://images.pexels.com/photos/10490155/pexels-photo-10490155.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940",
+    "dark_forest_creatures": "https://images.pexels.com/photos/6056489/pexels-photo-6056489.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940",
+    "wild_boar_creature": "https://images.pexels.com/photos/18963054/pexels-photo-18963054.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940",
+    "black_panther_creature": "https://images.pexels.com/photos/36711821/pexels-photo-36711821.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940",
+    "stag_beast": "https://images.unsplash.com/photo-1777144606392-ad4cc7c81bdd?crop=entropy&cs=srgb&fm=jpg&ixid=M3w4NjAxODF8MHwxfHNlYXJjaHxfYXJ0fGVufDB8fHx8MTc5MDMwMTQwMXww&ixlib=rb-4.1.0&q=85"
+  },
+  "general_ui_ux_guidelines": [
+    "Never rely on default browser styles or plain unstyled inputs for game UI.",
+    "Ensure total dark theme contrast compliance with glowing accents for interactive HUD elements.",
+    "Apply backdrop-blur and semi-opaque backgrounds for UI overlays over 3D canvas so text remains legible against dynamic 3D scenes.",
+    "Include hover audio feedback / subtle scale transform (scale-105) on menu buttons.",
+    "All components must be written in React JavaScript (.js files).",
+    "Keep key interaction states distinct (Default, Hover, Focus, Active, Disabled)."
+  ]
+}

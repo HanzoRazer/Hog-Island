@@ -17,7 +17,7 @@ import {
 } from '../../data/mockData';
 import { Pause, Play, Volume2, VolumeX, ArrowLeft, Eye, EyeOff } from 'lucide-react';
 
-const PracticeRange = () => {
+const PracticeRange = ({ onExit }) => {
   // Game States
   const [gameScreen, setGameScreen] = useState('menu'); // menu, playing, paused, gameover
   const [currentScenario, setCurrentScenario] = useState(null);
@@ -74,6 +74,19 @@ const PracticeRange = () => {
   const targetSpawnRef = useRef(null);
   const timerRef = useRef(null);
   const spawnedCountRef = useRef(0);
+  const targetsRef = useRef(targets);
+  const gameScreenRef = useRef(gameScreen);
+  const initialSpawnRef = useRef(null);
+
+  targetsRef.current = targets;
+  gameScreenRef.current = gameScreen;
+
+  useEffect(() => () => {
+    clearTimeout(initialSpawnRef.current);
+    clearTimeout(targetSpawnRef.current);
+    clearInterval(gameLoopRef.current);
+    clearInterval(timerRef.current);
+  }, []);
 
   // Save player stats to localStorage
   useEffect(() => {
@@ -90,7 +103,11 @@ const PracticeRange = () => {
   // Clean up hit markers
   useEffect(() => {
     const interval = setInterval(() => {
-      setHitMarkers(prev => prev.filter(m => Date.now() - m.time < 600));
+      setHitMarkers(prev => {
+        if (prev.length === 0) return prev;
+        const remaining = prev.filter(m => Date.now() - m.time < 600);
+        return remaining.length === prev.length ? prev : remaining;
+      });
     }, 100);
     return () => clearInterval(interval);
   }, []);
@@ -214,12 +231,17 @@ const PracticeRange = () => {
     spawnedCountRef.current = 0;
     
     const spawnNext = () => {
+      if (gameScreenRef.current === 'paused') {
+        targetSpawnRef.current = setTimeout(spawnNext, 250);
+        return;
+      }
+      if (gameScreenRef.current !== 'playing') return;
       if (spawnedCountRef.current >= scenario.targetCount) {
         return;
       }
       
       // Check simultaneous target limit
-      const activeCount = targets.filter(t => t.active).length;
+      const activeCount = targetsRef.current.filter(t => t.active).length;
       if (activeCount < levelData.simultaneousTargets) {
         spawnTarget(scenario, spawnedCountRef.current);
         spawnedCountRef.current++;
@@ -231,8 +253,8 @@ const PracticeRange = () => {
     };
     
     // Start spawning after initial delay
-    setTimeout(spawnNext, 1500);
-  }, [spawnTarget, targets]);
+    targetSpawnRef.current = setTimeout(spawnNext, 1500);
+  }, [spawnTarget]);
 
   // Start a scenario
   const startScenario = useCallback((scenario, weapon) => {
@@ -240,6 +262,7 @@ const PracticeRange = () => {
     clearInterval(gameLoopRef.current);
     clearInterval(timerRef.current);
     clearTimeout(targetSpawnRef.current);
+    clearTimeout(initialSpawnRef.current);
     
     setCurrentScenario(scenario);
     setCurrentWeapon(weapon);
@@ -265,7 +288,9 @@ const PracticeRange = () => {
     spawnedCountRef.current = 0;
     
     // Start spawning targets
-    setTimeout(() => startTargetSpawning(scenario), 1000);
+    initialSpawnRef.current = setTimeout(() => {
+      if (gameScreenRef.current === 'playing') startTargetSpawning(scenario);
+    }, 1000);
   }, [startTargetSpawning]);
 
   // Handle shooting with ballistics
@@ -289,8 +314,7 @@ const PracticeRange = () => {
     let hitTarget = null;
     let hitZone = null;
     
-    setTargets(prev => {
-      return prev.map(target => {
+    const nextTargets = targetsRef.current.map(target => {
         if (!target.active || hitTarget) return target;
         
         const baseSize = 70 * target.scale;
@@ -333,7 +357,8 @@ const PracticeRange = () => {
         
         return target;
       });
-    });
+    targetsRef.current = nextTargets;
+    setTargets(nextTargets);
 
     if (hitTarget) {
       // Calculate points
@@ -535,12 +560,18 @@ const PracticeRange = () => {
   // Render based on game screen
   if (gameScreen === 'menu') {
     return (
+      <div className="relative">
+      <button type="button" data-testid="practice-exit" onClick={onExit}
+        className="absolute right-4 top-4 z-50 rounded bg-stone-800 px-4 py-2 text-amber-400">
+        Back to Hog Island
+      </button>
       <MainMenu 
         onStartScenario={startScenario}
         playerStats={playerStats}
         currentWeapon={currentWeapon}
         onSelectWeapon={handleSelectWeapon}
       />
+      </div>
     );
   }
 
@@ -551,6 +582,11 @@ const PracticeRange = () => {
     const xpGained = calculateXP(sessionStats, score);
     
     return (
+      <div className="relative">
+      <button type="button" data-testid="practice-exit" onClick={onExit}
+        className="absolute right-4 top-4 z-50 rounded bg-stone-800 px-4 py-2 text-amber-400">
+        Back to Hog Island
+      </button>
       <GameOver
         score={score}
         stats={{
@@ -568,6 +604,7 @@ const PracticeRange = () => {
         onRestart={() => startScenario(currentScenario, currentWeapon)}
         onMainMenu={() => setGameScreen('menu')}
       />
+      </div>
     );
   }
 
