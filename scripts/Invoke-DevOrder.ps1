@@ -29,7 +29,7 @@ function Wait-Page([string]$url) {
         }
         Start-Sleep -Seconds 1
     }
-    throw "Timed out waiting for $url ($lastFailure). Logs: $logs\web.out.log and $logs\web.err.log"
+    throw "Timed out waiting for $url ($lastFailure). Logs: $logs"
 }
 
 try {
@@ -127,14 +127,24 @@ try {
 } catch {
     $report.error = $_.Exception.Message
     Write-Host "FAIL $($report.error)" -ForegroundColor Red
+    foreach ($name in @('api.err.log', 'api.out.log', 'web.err.log', 'web.out.log')) {
+        $logPath = Join-Path $logs $name
+        if (Test-Path $logPath) {
+            Write-Host "Recent $name output:"
+            Get-Content $logPath -Tail 40 -ErrorAction SilentlyContinue | ForEach-Object { Write-Host $_ }
+        }
+    }
 } finally {
     $report.finished = (Get-Date).ToString('o')
     $reportPath = Join-Path $logs 'report.json'
     $report | ConvertTo-Json -Depth 8 | Set-Content -Path $reportPath -Encoding UTF8
     Write-Host "Report: $reportPath"
     foreach ($p in @($webProcess, $apiProcess)) {
-        if ($null -ne $p) { taskkill /PID $p.Id /T /F *> $null }
+        if ($null -ne $p) {
+            # A crashed child is already gone; cleanup must not hide the original failure.
+            try { taskkill /PID $p.Id /T /F *> $null } catch {}
+        }
     }
-    if ($mongoStarted) { docker rm -f $container *> $null }
+    if ($mongoStarted) { try { docker rm -f $container *> $null } catch {} }
 }
 if ($report.error) { exit 1 }
