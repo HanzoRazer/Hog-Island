@@ -2,71 +2,80 @@
   min-height: 100vh;
 }
 
-/* Custom cursor for game canvas */
-.cursor-crosshair {
-  cursor: crosshair;
+.font-head {
+  font-family: "Barlow Condensed", "Bebas Neue", sans-serif;
+}
+.font-lore {
+  font-family: "Playfair Display", "Cormorant Garamond", serif;
+}
+.font-mono2 {
+  font-family: "JetBrains Mono", monospace;
+}
+.font-body {
+  font-family: "Inter", system-ui, sans-serif;
 }
 
-/* Animations */
-@keyframes pulse-glow {
-  0%, 100% {
-    box-shadow: 0 0 5px rgba(245, 158, 11, 0.5);
+.hud-label {
+  font-size: 0.7rem;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  font-family: "Barlow Condensed", sans-serif;
+  font-weight: 600;
+}
+
+/* drifting fog overlay for menu/lore/gameover screens */
+.fog-layer {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background:
+    radial-gradient(1200px 400px at 20% 10%, rgba(16, 185, 129, 0.06), transparent 60%),
+    radial-gradient(900px 500px at 80% 30%, rgba(6, 182, 212, 0.05), transparent 60%),
+    radial-gradient(1000px 600px at 50% 90%, rgba(255, 59, 48, 0.05), transparent 60%);
+  animation: fogdrift 18s ease-in-out infinite alternate;
+}
+
+@keyframes fogdrift {
+  from {
+    transform: translate3d(-2%, 0, 0) scale(1.05);
+    opacity: 0.8;
   }
-  50% {
-    box-shadow: 0 0 20px rgba(245, 158, 11, 0.8);
-  }
-}
-
-.animate-pulse-glow {
-  animation: pulse-glow 2s ease-in-out infinite;
-}
-
-@keyframes hit-marker {
-  0% {
-    transform: scale(1);
+  to {
+    transform: translate3d(2%, -2%, 0) scale(1.1);
     opacity: 1;
   }
-  100% {
-    transform: scale(1.5);
-    opacity: 0;
-  }
 }
 
-.hit-marker {
-  animation: hit-marker 0.5s ease-out forwards;
+@keyframes surge-breathe {
+  0%, 100% { filter: hue-rotate(0deg) blur(0px); transform: scale(1); }
+  50% { filter: hue-rotate(40deg) blur(1.5px); transform: scale(1.03); }
 }
 
-/* Canvas styles */
+@keyframes notice-fade {
+  0% { opacity: 0; transform: translate(-50%, 12px) scale(0.9); }
+  12% { opacity: 1; transform: translate(-50%, 0) scale(1); }
+  75% { opacity: 1; }
+  100% { opacity: 0; transform: translate(-50%, -10px); }
+}
+
+
+.cursor-crosshair { cursor: crosshair; }
+.no-select { user-select: none; }
+.animate-pulse-glow { animation: pulse-glow 2s ease-in-out infinite; }
+@keyframes pulse-glow {
+  0%, 100% { box-shadow: 0 0 5px rgba(245, 158, 11, 0.5); }
+  50% { box-shadow: 0 0 20px rgba(245, 158, 11, 0.8); }
+}
+.hit-marker { animation: hit-marker 0.5s ease-out forwards; }
+@keyframes hit-marker {
+  from { transform: scale(1); opacity: 1; }
+  to { transform: scale(1.5); opacity: 0; }
+}
 canvas {
-  image-rendering: -moz-crisp-edges;
-  image-rendering: -webkit-crisp-edges;
-  image-rendering: pixelated;
-  image-rendering: crisp-edges;
+  display: block;
+  outline: none;
 }
 
-/* Prevent text selection during gameplay */
-.no-select {
-  user-select: none;
-  -webkit-user-select: none;
-  -moz-user-select: none;
-  -ms-user-select: none;
-}
-
-/* Scrollbar styling */
-::-webkit-scrollbar {
-  width: 8px;
-  height: 8px;
-}
-
-::-webkit-scrollbar-track {
-  background: #1c1917;
-}
-
-::-webkit-scrollbar-thumb {
-  background: #44403c;
-  border-radius: 4px;
-}
-
-::-webkit-scrollbar-thumb:hover {
-  background: #57534e;
+::selection {
+  background: rgba(230, 179, 37, 0.35);
 }
