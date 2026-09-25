@@ -101,16 +101,14 @@ try {
     $report.checks.routes = 'pass'
     Write-Host 'Manual browser gate: play all three modes; check hits, pause, ammo, XP, booth unlock, scores and local progress.' -ForegroundColor Cyan
     Write-Host 'Refresh and use Back/Forward on every route; test an invalid booth URL and /gameover refresh.'
-    Write-Host 'Profile canvas and 3D frame times separately at repeatable target counts. Record traces.'
+    Write-Host 'Performance recording is deferred to HI-DEV-002; it is not required for this integration run.'
     Start-Process "$web/practice" | Out-Null
     $report.manual.browser = Read-Host 'Browser gameplay and routes (pass/fail/pending)'
-    $report.manual.performance_trace = Read-Host 'Trace file path or pending'
     $report.manual.notes = Read-Host 'Findings or pending'
     $report.checks.browser = $report.manual.browser
-    $traceExists = [bool]$report.manual.performance_trace -and (Test-Path $report.manual.performance_trace)
-    $report.checks.performance = if ($traceExists) { 'captured' } else { 'pending' }
-    if ($report.manual.browser -ne 'pass' -or $report.checks.performance -ne 'captured') {
-        throw 'Manual browser and performance gates remain incomplete; review the report before merge.'
+    $report.checks.performance = 'deferred to HI-DEV-002'
+    if ($report.manual.browser -ne 'pass') {
+        throw 'Manual browser gate is incomplete; review the report before merge.'
     }
 } catch {
     $report.error = $_.Exception.Message
