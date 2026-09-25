@@ -106,6 +106,12 @@ try {
     $report.manual.browser = Read-Host 'Browser gameplay and routes (pass/fail/pending)'
     $report.manual.performance_trace = Read-Host 'Trace file path or pending'
     $report.manual.notes = Read-Host 'Findings or pending'
+    $report.checks.browser = $report.manual.browser
+    $traceExists = [bool]$report.manual.performance_trace -and (Test-Path $report.manual.performance_trace)
+    $report.checks.performance = if ($traceExists) { 'captured' } else { 'pending' }
+    if ($report.manual.browser -ne 'pass' -or $report.checks.performance -ne 'captured') {
+        throw 'Manual browser and performance gates remain incomplete; review the report before merge.'
+    }
 } catch {
     $report.error = $_.Exception.Message
     Write-Host "FAIL $($report.error)" -ForegroundColor Red
