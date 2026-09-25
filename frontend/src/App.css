@@ -1,0 +1,56 @@
+.App {
+  min-height: 100vh;
+}
+
+.font-head {
+  font-family: "Barlow Condensed", "Bebas Neue", sans-serif;
+}
+.font-lore {
+  font-family: "Playfair Display", "Cormorant Garamond", serif;
+}
+.font-mono2 {
+  font-family: "JetBrains Mono", monospace;
+}
+.font-body {
+  font-family: "Inter", system-ui, sans-serif;
+}
+
+.hud-label {
+  font-size: 0.7rem;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  font-family: "Barlow Condensed", sans-serif;
+  font-weight: 600;
+}
+
+/* drifting fog overlay for menu/lore/gameover screens */
+.fog-layer {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background:
+    radial-gradient(1200px 400px at 20% 10%, rgba(16, 185, 129, 0.06), transparent 60%),
+    radial-gradient(900px 500px at 80% 30%, rgba(6, 182, 212, 0.05), transparent 60%),
+    radial-gradient(1000px 600px at 50% 90%, rgba(255, 59, 48, 0.05), transparent 60%);
+  animation: fogdrift 18s ease-in-out infinite alternate;
+}
+
+@keyframes fogdrift {
+  from {
+    transform: translate3d(-2%, 0, 0) scale(1.05);
+    opacity: 0.8;
+  }
+  to {
+    transform: translate3d(2%, -2%, 0) scale(1.1);
+    opacity: 1;
+  }
+}
+
+canvas {
+  display: block;
+  outline: none;
+}
+
+::selection {
+  background: rgba(230, 179, 37, 0.35);
+}
