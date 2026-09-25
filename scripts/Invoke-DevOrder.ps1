@@ -16,12 +16,9 @@ function Assert-True([bool]$ok, [string]$name) {
     if (-not $ok) { throw "$name failed. Logs: $logs" }
     Write-Host "PASS $name" -ForegroundColor Green
 }
-function Wait-Page([string]$url, [System.Diagnostics.Process]$serverProcess = $null) {
+function Wait-Page([string]$url) {
     $lastFailure = 'No response received'
     for ($i = 0; $i -lt 60; $i++) {
-        if ($null -ne $serverProcess -and $serverProcess.HasExited) {
-            throw "Server process $($serverProcess.Id) exited with code $($serverProcess.ExitCode) before $url responded. Logs: $logs"
-        }
         try {
             # History fallback serves deep links only when the request accepts HTML.
             $r = Invoke-WebRequest -Uri $url -Headers @{ Accept = 'text/html' } -UseBasicParsing -TimeoutSec 3
@@ -59,6 +56,12 @@ try {
     Assert-True (Test-Path (Join-Path $frontend 'node_modules')) 'Frontend modules present'
     $report.checks.dependencies = 'pass'
 
+    foreach ($port in @($ApiPort, $WebPort)) {
+        $listener = Get-NetTCPConnection -LocalPort $port -State Listen -ErrorAction SilentlyContinue | Select-Object -First 1
+        if ($listener) {
+            throw "Port $port is already in use by process $($listener.OwningProcess). Stop the existing server before this run."
+        }
+    }
     docker run --rm -d --name $container -p "127.0.0.1:${MongoPort}:27017" mongo:7 | Out-Null
     Assert-True ($LASTEXITCODE -eq 0) 'Isolated MongoDB started'
     $mongoStarted = $true
@@ -87,7 +90,7 @@ try {
     $apiArgs = @('-m', 'uvicorn', 'server:app', '--host', '127.0.0.1', '--port', "$ApiPort")
     $apiProcess = Start-Process -FilePath $python -WorkingDirectory $backend -ArgumentList $apiArgs -PassThru -RedirectStandardOutput (Join-Path $logs 'api.out.log') -RedirectStandardError (Join-Path $logs 'api.err.log')
     $api = "http://127.0.0.1:$ApiPort/api"
-    Wait-Page "$api/" $apiProcess | Out-Null
+    Wait-Page "$api/" | Out-Null
     $guest = Invoke-RestMethod -Method Post -Uri "$api/auth/guest" -ContentType 'application/json' -Body (@{ name = 'Integration Hunter' } | ConvertTo-Json)
     Assert-True ([bool]$guest.id) 'Guest login'
     $score = Invoke-RestMethod -Method Post -Uri "$api/scores" -ContentType 'application/json' -Body (@{ player_id = $guest.id; name = $guest.name; score = 900; kills = 2; wave = 1; survival_time = 30 } | ConvertTo-Json)
@@ -146,6 +149,20 @@ try {
         if ($null -ne $p) {
             # A crashed child is already gone; cleanup must not hide the original failure.
             try { taskkill /PID $p.Id /T /F *> $null } catch {}
+        }
+    }
+    # Windows virtualenv launchers can exit while their Python child keeps serving.
+    # Uvicorn records that child's PID in this run's startup log.
+    $apiLog = Join-Path $logs 'api.err.log'
+    if (Test-Path $apiLog) {
+        $started = Get-Content $apiLog -ErrorAction SilentlyContinue |
+            Select-String 'Started server process \\[(\\d+)\\]' | Select-Object -Last 1
+        if ($started) {
+            $apiServerPid = [int]$started.Matches[0].Groups[1].Value
+            $runningServer = Get-CimInstance Win32_Process -Filter "ProcessId = $apiServerPid" -ErrorAction SilentlyContinue
+            if ($runningServer -and $runningServer.CommandLine -match 'uvicorn\\s+server:app') {
+                try { taskkill /PID $apiServerPid /T /F *> $null } catch {}
+            }
         }
     }
     if ($mongoStarted) { try { docker rm -f $container *> $null } catch {} }
