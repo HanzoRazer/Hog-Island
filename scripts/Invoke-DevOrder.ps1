@@ -156,11 +156,11 @@ try {
     $apiLog = Join-Path $logs 'api.err.log'
     if (Test-Path $apiLog) {
         $started = Get-Content $apiLog -ErrorAction SilentlyContinue |
-            Select-String 'Started server process \\[(\\d+)\\]' | Select-Object -Last 1
+            Select-String 'Started server process \[(\d+)\]' | Select-Object -Last 1
         if ($started) {
             $apiServerPid = [int]$started.Matches[0].Groups[1].Value
             $runningServer = Get-CimInstance Win32_Process -Filter "ProcessId = $apiServerPid" -ErrorAction SilentlyContinue
-            if ($runningServer -and $runningServer.CommandLine -match 'uvicorn\\s+server:app') {
+            if ($runningServer -and $runningServer.CommandLine -match 'uvicorn\s+server:app') {
                 try { taskkill /PID $apiServerPid /T /F *> $null } catch {}
             }
         }
