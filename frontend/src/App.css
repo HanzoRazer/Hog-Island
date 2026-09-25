@@ -46,6 +46,19 @@
   }
 }
 
+@keyframes surge-breathe {
+  0%, 100% { filter: hue-rotate(0deg) blur(0px); transform: scale(1); }
+  50% { filter: hue-rotate(40deg) blur(1.5px); transform: scale(1.03); }
+}
+
+@keyframes notice-fade {
+  0% { opacity: 0; transform: translate(-50%, 12px) scale(0.9); }
+  12% { opacity: 1; transform: translate(-50%, 0) scale(1); }
+  75% { opacity: 1; }
+  100% { opacity: 0; transform: translate(-50%, -10px); }
+}
+
+
 canvas {
   display: block;
   outline: none;
