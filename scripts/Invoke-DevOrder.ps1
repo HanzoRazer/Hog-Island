@@ -17,14 +17,19 @@ function Assert-True([bool]$ok, [string]$name) {
     Write-Host "PASS $name" -ForegroundColor Green
 }
 function Wait-Page([string]$url) {
+    $lastFailure = 'No response received'
     for ($i = 0; $i -lt 60; $i++) {
         try {
-            $r = Invoke-WebRequest -Uri $url -UseBasicParsing -TimeoutSec 3
+            # History fallback serves deep links only when the request accepts HTML.
+            $r = Invoke-WebRequest -Uri $url -Headers @{ Accept = 'text/html' } -UseBasicParsing -TimeoutSec 3
             if ($r.StatusCode -eq 200) { return $r }
-        } catch {}
+            $lastFailure = "HTTP $($r.StatusCode)"
+        } catch {
+            $lastFailure = $_.Exception.Message
+        }
         Start-Sleep -Seconds 1
     }
-    throw "Timed out waiting for $url. Logs: $logs"
+    throw "Timed out waiting for $url ($lastFailure). Logs: $logs\web.out.log and $logs\web.err.log"
 }
 
 try {
