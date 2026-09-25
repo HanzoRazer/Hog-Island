@@ -1,0 +1,28 @@
+{
+  "summary": "Phase 3 additions tested: audio prefs (mute/volume/M key/localStorage), weapon arsenal (rifle/shotgun/marksman keyboard 1-2-3 + Q cycle + clickable slot buttons + R with full mag), HUD, asset probe, abandon+reset, and backend regression. Backend regression: 9/9 pytest pass. Frontend: all core new features work. One UX bug found: clicking mute-toggle-button or volume-slider inside pause-overlay dismisses the pause overlay (PointerLockControls document click handler requests pointer lock on ANY click, causing locked=true and unmounting the overlay). Keyboard-based interaction (M key, Digit1/2/3, Q, R) is unaffected.",
+  "backend_issues": {"critical": [], "minor": []},
+  "frontend_issues": {
+    "ui_bugs": [
+      {"component": "PauseOverlay", "issue": "Clicking mute-toggle-button or volume-slider dismisses the pause overlay because drei PointerLockControls listens to document 'click' and requests pointer lock on any click. The overlay unmounts (guarded by !locked && phase==='playing'). Suggested fix: stop event propagation on pause-overlay interactive controls (e.g. onMouseDown={e=>e.stopPropagation()} on audio-settings container and abandon button), or wrap PointerLockControls with selector option pointing to the canvas only, or gate PointerLockControls to only request when phase==='playing' && overlay-hidden.", "selector": "[data-testid=mute-toggle-button], [data-testid=volume-slider]", "priority": "MEDIUM"}
+    ],
+    "integration_issues": [],
+    "design_issues": []
+  },
+  "test_report_links": ["/app/backend/tests/backend_test.py", "/app/test_reports/pytest/pytest_results.xml"],
+  "action_items": [
+    "Prevent PointerLockControls from locking when the user clicks interactive controls inside the pause overlay (mute button, volume slider, abandon button). Options: stopPropagation on those controls' mousedown, or reconfigure PointerLockControls domElement to canvas only, or unmount PointerLockControls while !locked pause is showing."
+  ],
+  "critical_code_review_comments": [
+    "GameScreen.jsx is ~500+ lines mixing player controller, weapons, waves, pickups, surge timers, and key handlers. Split into hooks: useWeapons, useWaves, useAudioPrefs, useSurge, usePickups.",
+    "PointerLockControls captures document click globally; UI controls in overlays should stopPropagation to prevent unintended lock/dismiss.",
+    "audio.init is created on resume-play-button click — good. Ensure AudioContext resume is also called after mute→unmute if context was suspended, otherwise sfx may stay silent."
+  ],
+  "updated_files": [],
+  "success_rate": {"backend": "100%", "frontend": "95%"},
+  "test_credentials": "Guest-only. Preset via localStorage 'hog_island_player' = {id:'test-1', name:'Tester'}.",
+  "seed_data_creation": "None new (reused existing TEST_ players from iteration 1).",
+  "retest_needed": false,
+  "should_main_agent_self_test": true,
+  "context_for_next_testing_agent": "Verified: menu-play-button → game-screen + pause-overlay + canvas mount; volume-value default '70%', hud-audio-state '70% · [M]'; slider→0.4 updates value + persists to localStorage 'hog_island_audio' as {volume:0.4, muted:false}; KeyM toggles mute (hud-audio-state='MUTED · [M]', volume-value='MUTE', slider.disabled=true); Weapon panel defaults Warden Carbine 12/∞ with three slots showing 12/∞, 6/18, 5/10; Digit1/2/3, KeyQ cycle, click weapon-slot-marksman all switch correctly; KeyR with full mag shows no hud-reloading and no crash; abandon-hunt-button returns to menu and re-entering resets weapons to defaults; asset HEAD /assets/map/hog_island.glb returns 200 text/html (SPA fallback) — placeholder geometry renders without console errors. Surge banner (wave 2 @ ~40s) not exercised due to time budget. Firing / movement / reload deplete cannot be tested in headless (no pointer lock granted for canvas + WASD listeners require locked). Known UX bug: mouse-clicking mute/slider inside pause overlay dismisses the overlay (see frontend_issues).",
+  "rca of the issue": "PointerLockControls from @react-three/drei binds a 'click' listener to document.body which calls domElement.requestPointerLock() on any click. In headless Chrome the request is granted, flipping locked=true; PauseOverlay is rendered only when !locked, so it unmounts. The volume-slider then disappears and any pending interactions error out. Fix by scoping PointerLockControls to canvas element only, or preventing click bubbling from pause overlay controls, or unmounting PointerLockControls while paused."
+}

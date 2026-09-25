@@ -112,7 +112,7 @@ function Scene(props) {
   const enemiesGroupRef = useRef();
   return (
     <>
-      <PointerLockControls ref={controlsRef} onLock={() => onLockChange(true)} onUnlock={() => onLockChange(false)} />
+      <PointerLockControls ref={controlsRef} selector="#pointer-lock-disabled" onLock={() => onLockChange(true)} onUnlock={() => onLockChange(false)} />
       <color attach="background" args={[FOG_COLOR]} />
       <fogExp2 attach="fog" args={[FOG_COLOR, 0.028]} />
       <Sky sunPosition={[5, 1, 8]} turbidity={12} rayleigh={0.4} inclination={0.48} />
