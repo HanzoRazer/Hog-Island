@@ -226,4 +226,12 @@ const configureDevServer = webpackConfig.devServer;
 webpackConfig.devServer = (devServerConfig) =>
   makeDevServerV5Compatible(configureDevServer(devServerConfig));
 
+// Preserve the source alias even if an optional development wrapper replaces
+// the webpack options object. UI components still import through @/.
+webpackConfig.webpack = webpackConfig.webpack || {};
+webpackConfig.webpack.alias = {
+  ...webpackConfig.webpack.alias,
+  '@': path.resolve(__dirname, 'src'),
+};
+
 module.exports = webpackConfig;

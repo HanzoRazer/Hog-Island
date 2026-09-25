@@ -74,7 +74,10 @@ function CaliberPicker({ value, onChange }) {
 export default function Booth({ player, onBack, onStart }) {
   const [progress, setProgress] = useState(null);
   const [level, setLevel] = useState(1);
-  const [caliber, setCaliber] = useState(() => localStorage.getItem(LAST_CAL_KEY) || "r223");
+  const [caliber, setCaliber] = useState(() => {
+    const saved = localStorage.getItem(LAST_CAL_KEY);
+    return saved && CALIBERS[saved] ? saved : "r223";
+  });
   const [board, setBoard] = useState(null);
 
   useEffect(() => {
