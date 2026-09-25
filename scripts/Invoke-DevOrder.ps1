@@ -16,9 +16,12 @@ function Assert-True([bool]$ok, [string]$name) {
     if (-not $ok) { throw "$name failed. Logs: $logs" }
     Write-Host "PASS $name" -ForegroundColor Green
 }
-function Wait-Page([string]$url) {
+function Wait-Page([string]$url, [System.Diagnostics.Process]$serverProcess = $null) {
     $lastFailure = 'No response received'
     for ($i = 0; $i -lt 60; $i++) {
+        if ($null -ne $serverProcess -and $serverProcess.HasExited) {
+            throw "Server process $($serverProcess.Id) exited with code $($serverProcess.ExitCode) before $url responded. Logs: $logs"
+        }
         try {
             # History fallback serves deep links only when the request accepts HTML.
             $r = Invoke-WebRequest -Uri $url -Headers @{ Accept = 'text/html' } -UseBasicParsing -TimeoutSec 3
@@ -84,7 +87,7 @@ try {
     $apiArgs = @('-m', 'uvicorn', 'server:app', '--host', '127.0.0.1', '--port', "$ApiPort")
     $apiProcess = Start-Process -FilePath $python -WorkingDirectory $backend -ArgumentList $apiArgs -PassThru -RedirectStandardOutput (Join-Path $logs 'api.out.log') -RedirectStandardError (Join-Path $logs 'api.err.log')
     $api = "http://127.0.0.1:$ApiPort/api"
-    Wait-Page "$api/" | Out-Null
+    Wait-Page "$api/" $apiProcess | Out-Null
     $guest = Invoke-RestMethod -Method Post -Uri "$api/auth/guest" -ContentType 'application/json' -Body (@{ name = 'Integration Hunter' } | ConvertTo-Json)
     Assert-True ([bool]$guest.id) 'Guest login'
     $score = Invoke-RestMethod -Method Post -Uri "$api/scores" -ContentType 'application/json' -Body (@{ player_id = $guest.id; name = $guest.name; score = 900; kills = 2; wave = 1; survival_time = 30 } | ConvertTo-Json)
